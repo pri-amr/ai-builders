@@ -1,8 +1,14 @@
 import express from "express";
+import cors from "cors";
 import authRouter from "./routes/auth";
 
 const app = express();
 
+const corsOrigins = (process.env.CORS_ORIGIN ?? "")
+  .split(",")
+  .map((origin) => origin.trim());
+
+app.use(cors({ origin: corsOrigins }));
 app.use(express.json());
 
 app.get("/health", (_req, res) => {
