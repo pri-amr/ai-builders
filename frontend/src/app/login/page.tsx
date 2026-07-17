@@ -3,6 +3,7 @@
 import { Suspense, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { Spinner } from "@/components/Spinner";
 
 export default function LoginPage() {
   return (
@@ -89,8 +90,9 @@ function LoginForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-full bg-foreground px-5 py-2 text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+          className="flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-2 text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
         >
+          {isSubmitting && <Spinner />}
           {isSubmitting ? "Ingresando..." : "Ingresar"}
         </button>
 

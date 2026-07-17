@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { registerUser } from "@/services/session";
+import { Spinner } from "@/components/Spinner";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -88,8 +89,9 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-full bg-foreground px-5 py-2 text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+          className="flex items-center justify-center gap-2 rounded-full bg-foreground px-5 py-2 text-background transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
         >
+          {isSubmitting && <Spinner />}
           {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
         </button>
 
