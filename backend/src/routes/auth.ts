@@ -2,6 +2,7 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/User";
 import { signToken } from "../utils/jwt";
+import { seedPredefinedMoneySources } from "../services/moneySources";
 
 const router = Router();
 
@@ -38,6 +39,8 @@ router.post("/register", async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
     const user = await User.create({ email: normalizedEmail, passwordHash });
+
+    await seedPredefinedMoneySources(String(user._id));
 
     return res.status(201).json({ id: user._id, email: user.email });
   } catch (error) {
