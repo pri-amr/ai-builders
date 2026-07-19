@@ -1,4 +1,5 @@
 import { auth, signOut } from "@/auth";
+import { DashboardTransactions } from "@/components/DashboardTransactions";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -23,6 +24,7 @@ export default async function DashboardPage() {
       >
         Gestionar categorías
       </a>
+      <DashboardTransactions token={session?.backendToken ?? ""} />
       <form
         action={async () => {
           "use server";
