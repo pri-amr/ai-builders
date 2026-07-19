@@ -8,6 +8,25 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+router.get("/", requireAuth, async (req, res) => {
+  try {
+    const moneySources = await MoneySource.find({ userId: req.userId }).sort({
+      name: 1,
+    });
+
+    return res.status(200).json(
+      moneySources.map((moneySource) => ({
+        id: moneySource._id,
+        name: moneySource.name,
+      }))
+    );
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "No se pudieron obtener las fuentes de dinero" });
+  }
+});
+
 router.post("/", requireAuth, async (req, res) => {
   const { name } = req.body ?? {};
 

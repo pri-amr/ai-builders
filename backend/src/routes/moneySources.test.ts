@@ -7,6 +7,7 @@ jest.mock("../models/MoneySource");
 
 const mockedFindOne = MoneySource.findOne as unknown as jest.Mock;
 const mockedCreate = MoneySource.create as unknown as jest.Mock;
+const mockedFind = MoneySource.find as unknown as jest.Mock;
 
 describe("POST /api/money-sources", () => {
   const originalSecret = process.env.JWT_SECRET;
@@ -24,6 +25,7 @@ describe("POST /api/money-sources", () => {
   beforeEach(() => {
     mockedFindOne.mockReset();
     mockedCreate.mockReset();
+    mockedFind.mockReset();
   });
 
   it("responde 401 si no hay token", async () => {
@@ -101,5 +103,63 @@ describe("POST /api/money-sources", () => {
       userId: "user-id-123",
       name: "Uala",
     });
+  });
+});
+
+describe("GET /api/money-sources", () => {
+  const originalSecret = process.env.JWT_SECRET;
+  let token: string;
+  let mockedSort: jest.Mock;
+
+  beforeAll(() => {
+    process.env.JWT_SECRET = "test-secret";
+    token = signToken({ sub: "user-id-123", email: "user@example.com" });
+  });
+
+  afterAll(() => {
+    process.env.JWT_SECRET = originalSecret;
+  });
+
+  beforeEach(() => {
+    mockedFind.mockReset();
+    mockedSort = jest.fn();
+    mockedFind.mockReturnValue({ sort: mockedSort });
+  });
+
+  it("responde 401 si no hay token", async () => {
+    const response = await request(app).get("/api/money-sources");
+
+    expect(response.status).toBe(401);
+    expect(mockedFind).not.toHaveBeenCalled();
+  });
+
+  it("devuelve únicamente las fuentes del usuario autenticado, ordenadas por nombre", async () => {
+    mockedSort.mockResolvedValue([
+      { _id: "id-1", name: "Brubank" },
+      { _id: "id-2", name: "Santander" },
+    ]);
+
+    const response = await request(app)
+      .get("/api/money-sources")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(mockedFind).toHaveBeenCalledWith({ userId: "user-id-123" });
+    expect(mockedSort).toHaveBeenCalledWith({ name: 1 });
+    expect(response.body).toEqual([
+      { id: "id-1", name: "Brubank" },
+      { id: "id-2", name: "Santander" },
+    ]);
+  });
+
+  it("devuelve una lista vacía si el usuario no tiene fuentes", async () => {
+    mockedSort.mockResolvedValue([]);
+
+    const response = await request(app)
+      .get("/api/money-sources")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([]);
   });
 });
