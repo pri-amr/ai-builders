@@ -17,6 +17,12 @@ export default async function DashboardPage() {
       >
         Gestionar fuentes de dinero
       </a>
+      <a
+        href="/dashboard/categories"
+        className="text-sm text-zinc-600 underline dark:text-zinc-400"
+      >
+        Gestionar categorías
+      </a>
       <form
         action={async () => {
           "use server";
