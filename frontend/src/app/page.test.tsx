@@ -1,12 +1,21 @@
-import { render, screen } from "@testing-library/react";
+import { redirect } from "next/navigation";
 import Home from "./page";
 
-describe("Home", () => {
-  it("renderiza sin errores", () => {
-    render(<Home />);
+jest.mock("next/navigation", () => ({
+  redirect: jest.fn(() => {
+    throw new Error("NEXT_REDIRECT");
+  }),
+}));
 
-    expect(
-      screen.getByText(/edit the page.tsx file/i)
-    ).toBeInTheDocument();
+const mockedRedirect = redirect as unknown as jest.Mock;
+
+describe("Home", () => {
+  beforeEach(() => {
+    mockedRedirect.mockClear();
+  });
+
+  it("redirige a /login", () => {
+    expect(() => Home()).toThrow("NEXT_REDIRECT");
+    expect(mockedRedirect).toHaveBeenCalledWith("/login");
   });
 });
