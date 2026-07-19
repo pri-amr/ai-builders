@@ -11,6 +11,12 @@ export default async function DashboardPage() {
       <p className="text-zinc-600 dark:text-zinc-400">
         Sesión iniciada como {session?.user?.email}
       </p>
+      <a
+        href="/dashboard/money-sources"
+        className="text-sm text-zinc-600 underline dark:text-zinc-400"
+      >
+        Gestionar fuentes de dinero
+      </a>
       <form
         action={async () => {
           "use server";
