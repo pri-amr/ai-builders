@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import authRouter from "./routes/auth";
 import moneySourcesRouter from "./routes/moneySources";
+import categoriesRouter from "./routes/categories";
 
 const app = express();
 
@@ -18,5 +19,6 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/auth", authRouter);
 app.use("/api/money-sources", moneySourcesRouter);
+app.use("/api/categories", categoriesRouter);
 
 export default app;

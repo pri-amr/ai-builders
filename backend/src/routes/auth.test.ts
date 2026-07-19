@@ -4,14 +4,18 @@ import jwt from "jsonwebtoken";
 import app from "../app";
 import User from "../models/User";
 import MoneySource from "../models/MoneySource";
+import Category from "../models/Category";
 import { PREDEFINED_MONEY_SOURCES } from "../constants/moneySources";
+import { PREDEFINED_CATEGORIES } from "../constants/categories";
 
 jest.mock("../models/User");
 jest.mock("../models/MoneySource");
+jest.mock("../models/Category");
 
 const mockedFindOne = User.findOne as unknown as jest.Mock;
 const mockedCreate = User.create as unknown as jest.Mock;
 const mockedInsertMany = MoneySource.insertMany as unknown as jest.Mock;
+const mockedInsertManyCategories = Category.insertMany as unknown as jest.Mock;
 
 describe("POST /api/auth/register", () => {
   beforeEach(() => {
@@ -19,6 +23,8 @@ describe("POST /api/auth/register", () => {
     mockedCreate.mockReset();
     mockedInsertMany.mockReset();
     mockedInsertMany.mockResolvedValue(undefined);
+    mockedInsertManyCategories.mockReset();
+    mockedInsertManyCategories.mockResolvedValue(undefined);
   });
 
   it("responde 400 si falta el password", async () => {
@@ -100,6 +106,43 @@ describe("POST /api/auth/register", () => {
       passwordHash: "hash",
     });
     mockedInsertMany.mockRejectedValue(new Error("fallo de red"));
+
+    const response = await request(app)
+      .post("/api/auth/register")
+      .send({ email: "user@example.com", password: "secreto123" });
+
+    expect(response.status).toBe(201);
+    expect(response.body).toEqual({ id: "user-id-123", email: "user@example.com" });
+  }, 10000);
+
+  it("siembra las categorías predefinidas para el usuario recién creado", async () => {
+    mockedFindOne.mockResolvedValue(null);
+    mockedCreate.mockResolvedValue({
+      _id: "user-id-123",
+      email: "user@example.com",
+      passwordHash: "hash",
+    });
+
+    await request(app)
+      .post("/api/auth/register")
+      .send({ email: "user@example.com", password: "secreto123" });
+
+    expect(mockedInsertManyCategories).toHaveBeenCalledWith(
+      PREDEFINED_CATEGORIES.map((name) => ({
+        userId: "user-id-123",
+        name,
+      }))
+    );
+  });
+
+  it("responde 201 igual si falla la siembra de categorías predefinidas", async () => {
+    mockedFindOne.mockResolvedValue(null);
+    mockedCreate.mockResolvedValue({
+      _id: "user-id-123",
+      email: "user@example.com",
+      passwordHash: "hash",
+    });
+    mockedInsertManyCategories.mockRejectedValue(new Error("fallo de red"));
 
     const response = await request(app)
       .post("/api/auth/register")

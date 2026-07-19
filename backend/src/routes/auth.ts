@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/User";
 import { signToken } from "../utils/jwt";
 import { seedPredefinedMoneySources } from "../services/moneySources";
+import { seedPredefinedCategories } from "../services/categories";
 
 const router = Router();
 
@@ -41,6 +42,7 @@ router.post("/register", async (req, res) => {
     const user = await User.create({ email: normalizedEmail, passwordHash });
 
     await seedPredefinedMoneySources(String(user._id));
+    await seedPredefinedCategories(String(user._id));
 
     return res.status(201).json({ id: user._id, email: user.email });
   } catch (error) {
